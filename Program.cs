@@ -1,3 +1,4 @@
+using System;
 using Microsoft.EntityFrameworkCore;
 using TaskTrackerApi.Data;
 using Microsoft.AspNetCore.Builder;
@@ -10,6 +11,15 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// builder.Services.AddSwaggerGen(options =>
+// {
+//     options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+//     {
+//         Title = "EFprojectOne",
+//         Version = "v1"
+//     });
+// });
 
 var app = builder.Build();
 
@@ -39,4 +49,4 @@ app.MapPut("/tasks/{id}/complete", async (AppDbContext db, int id) =>
     return Results.Ok(task);
 });
 
-app.Run(); 
+app.Run();
