@@ -1,4 +1,3 @@
-// DTOs/TaskDto.cs
 namespace TaskTrackerApi.DTOs;
 
 public class TaskDto
@@ -12,6 +11,4 @@ public class TaskDto
 public class CreateTaskDto
 {
     public string Title { get; set; } = string.Empty;
-    public bool IsComplete { get; set; }
-
 }
