@@ -1,6 +1,8 @@
 using TaskTrackerApi.DTOs;
 using TaskTrackerApi.Models;
 using TaskTrackerApi.Repositories;
+using TaskTrackerApi.Exceptions;
+
 
 namespace TaskTrackerApi.Services;
 
@@ -24,10 +26,11 @@ public class TaskService : ITaskService
         return MapToDto(task);
     }
 
-    public async Task<TaskDto?> CompleteTaskAsync(int id)
+    public async Task<TaskDto> CompleteTaskAsync(int id)
     {
         var task = await _repository.GetByIdAsync(id);
-        if (task is null) return null;
+        if (task is null) 
+            throw new TaskNotFoundException(id);
 
         task.IsComplete = true;
         await _repository.SaveChangesAsync();

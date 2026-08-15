@@ -29,6 +29,6 @@ public class TasksController : ControllerBase
     public async Task<ActionResult<TaskDto>> Complete(int id)
     {
         var result = await _taskService.CompleteTaskAsync(id);
-        return result is null ? NotFound() : Ok(result);
+        return Ok(result);
     }
 }
