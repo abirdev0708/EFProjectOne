@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using TaskTrackerApi.DTOs;
 using TaskTrackerApi.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TaskTrackerApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize] 
 public class TasksController : ControllerBase
 {
     private readonly ITaskService _taskService;

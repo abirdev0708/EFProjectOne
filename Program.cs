@@ -8,18 +8,49 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using TaskTrackerApi.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();
 builder.Services.AddScoped<ITaskService, TaskService>();
+builder.Services.AddScoped<IAuthService, AuthService>();      // add this
+builder.Services.AddScoped<ITokenService, TokenService>();    // add this
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+
+var jwtKey = builder.Configuration["Jwt:Key"]!;
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+var jwtAudience = builder.Configuration["Jwt:Audience"];
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+    };
+});
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -39,6 +70,8 @@ app.UseExceptionHandler(exceptionHandlerApp =>
         var (statusCode, title) = exception switch
         {
             TaskNotFoundException => (StatusCodes.Status404NotFound, exception!.Message),
+            ConflictException => (StatusCodes.Status409Conflict, exception!.Message),
+            UnauthorizedException => (StatusCodes.Status401Unauthorized, exception!.Message),
             ArgumentException => (StatusCodes.Status400BadRequest, exception!.Message),
             _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred.")
         };
@@ -57,5 +90,8 @@ app.UseExceptionHandler(exceptionHandlerApp =>
     });
 });
 
+
+app.UseAuthentication();   // add this — MUST come before UseAuthorization
+app.UseAuthorization();    // add this\
 app.MapControllers();
 app.Run();
