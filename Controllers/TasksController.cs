@@ -14,11 +14,16 @@ public class TasksController : ControllerBase
 
     public TasksController(ITaskService taskService) => _taskService = taskService;
 
+   
+
     [HttpGet]
-    public async Task<ActionResult<List<TaskDto>>> GetAll()
+    public async Task<ActionResult<PagedResultDto<TaskDto>>> GetAll([FromQuery] PaginationQueryDto query)
     {
-        return Ok(await _taskService.GetAllTasksAsync());
+        var result = await _taskService.GetAllTasksAsync(query.Page, query.PageSize);
+        return Ok(result);
     }
+
+
 
     [HttpPost]
     public async Task<ActionResult<TaskDto>> Create(CreateTaskDto dto)

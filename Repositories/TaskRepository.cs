@@ -10,9 +10,19 @@ public class TaskRepository : ITaskRepository
 
     public TaskRepository(AppDbContext context) => _context = context;
 
-    public async Task<List<TaskItem>> GetAllAsync() =>
-        await _context.Tasks.ToListAsync();
+    public async Task<(List<TaskItem> Items, int TotalCount)> GetAllAsync(int page, int pageSize)
+    {
+        var query = _context.Tasks.OrderByDescending(t => t.Id);
 
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (items, totalCount);
+    }
     public async Task<TaskItem?> GetByIdAsync(int id) =>
         await _context.Tasks.FindAsync(id);
 

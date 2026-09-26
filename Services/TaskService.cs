@@ -12,11 +12,19 @@ public class TaskService : ITaskService
 
     public TaskService(ITaskRepository repository) => _repository = repository;
 
-    public async Task<List<TaskDto>> GetAllTasksAsync()
+    // TaskService.cs
+public async Task<PagedResultDto<TaskDto>> GetAllTasksAsync(int page, int pageSize)
+{
+    var (tasks, totalCount) = await _repository.GetAllAsync(page, pageSize);
+
+    return new PagedResultDto<TaskDto>
     {
-        var tasks = await _repository.GetAllAsync();
-        return tasks.Select(MapToDto).ToList();
-    }
+        Items = tasks.Select(MapToDto).ToList(),
+        Page = page,
+        PageSize = pageSize,
+        TotalCount = totalCount
+    };
+}
 
     public async Task<TaskDto> CreateTaskAsync(CreateTaskDto dto)
     {
