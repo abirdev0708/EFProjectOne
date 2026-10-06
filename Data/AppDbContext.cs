@@ -12,6 +12,8 @@ public class AppDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Role> Roles => Set<Role>();
 
+    public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>()
@@ -24,6 +26,11 @@ public class AppDbContext : DbContext
             new Role { Id = 1, RoleName = "Admin", IsActive = true, CreatedAt = new DateTime(2026, 1, 1) },
             new Role { Id = 2, RoleName = "User", IsActive = true, CreatedAt = new DateTime(2026, 1, 1) }
         );
+
+        modelBuilder.Entity<User>()
+            .HasOne(u => u.Profile)
+            .WithOne(p => p.User)
+            .HasForeignKey<UserProfile>(p => p.UserId);
 
         base.OnModelCreating(modelBuilder);
     }
